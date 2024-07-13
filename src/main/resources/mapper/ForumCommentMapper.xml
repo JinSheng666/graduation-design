@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.ForumCommentMapper">
+
+    <select id="forumCommentCount" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.forum_comment a1,
+            graduation_design.tb_user a2
+        where
+            a1.is_delete = 0
+          and
+            a2.is_delete = 0
+          and
+            a2.user_id = a1.user_id
+          and
+            a1.forum_id = #{forumId};
+    </select>
+
+    <select id="forumCommentByForumId" resultType="com.jinsheng.vo.VoForumComment">
+        select
+               a1.fc_id,a1.forum_id,a1.parent_id, a1.comment, a1.like_count,
+               a1.create_time,a2.user_name userName,a2.head_sculpture as headSculpture
+        from
+             graduation_design.forum_comment a1,
+             graduation_design.tb_user a2
+        where
+            a1.is_delete = 0
+          and
+            a2.is_delete = 0
+          and
+            a2.user_id = a1.user_id
+          and
+            a1.forum_id = #{forumId}
+            order by a1.create_time desc;
+    </select>
+
+    <insert id="addComment">
+        insert into graduation_design.forum_comment values (null,#{forumId},#{userId},#{parentId},#{comment},0,now(),0);
+    </insert>
+
+    <!--<update id="deleteComment">
+        update
+            graduation_design.forum_comment
+        set
+            is_delete = 1
+        where
+            fc_id = #{commentId}
+    </update>-->
+
+    <delete id="deleteComment">
+        delete from graduation_design.forum_comment where fc_id = #{commentId};
+    </delete>
+
+    <select id="findParentId" resultType="forumComment">
+        select * from graduation_design.forum_comment where parent_id = #{commentId};
+    </select>
+
+    <delete id="deleteCommentParent">
+        delete from graduation_design.forum_comment where parent_id = #{commentId};
+    </delete>
+
+    <select id="findCommentById" resultType="integer">
+        select forum_id from graduation_design.forum_comment where is_delete = 0 and fc_id = #{commentId};
+    </select>
+
+    <select id="findCommentByUserId" resultType="forumComment">
+        select * from graduation_design.forum_comment where is_delete = 0 and user_id = #{userId} and fc_id = #{commentId};
+    </select>
+
+    <update id="updateCommentLike">
+        update graduation_design.forum_comment set like_count = #{count} where fc_id = #{commentId};
+    </update>
+
+    <select id="forumCommentCountById" resultType="integer">
+        select count(*) from graduation_design.forum_comment where forum_id = #{forumId};
+    </select>
+
+    <delete id="commentDelete">
+        delete from graduation_design.forum_comment where forum_id = #{forumId};
+    </delete>
+
+    <select id="getCommentByForumId" resultType="integer">
+        select fc_id from graduation_design.forum_comment where forum_id = #{forumId};
+    </select>
+
+</mapper>

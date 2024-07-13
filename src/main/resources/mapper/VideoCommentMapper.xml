@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.VideoCommentMapper">
+
+    <select id="CommentCountByVideoId" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.video_comment a1,
+            graduation_design.tb_user a2
+        where
+            a2.user_id = a1.user_id
+          and
+            a1.is_delete = 0
+          and
+            a2.is_delete = 0
+          and
+            a1.video_id = #{videoId};
+    </select>
+
+    <select id="CommentByVideoId" resultType="com.jinsheng.vo.VoVideoComment">
+        select
+               a1.vc_id vcId, a1.video_id videoId, a1.parent_id parentId,
+               a1.comment, a1.like_count likeCount, a1.create_time createTime, a2.user_name userName,a2.head_sculpture as headSculpture
+        from
+             graduation_design.video_comment a1,
+             graduation_design.tb_user a2
+        where
+              a2.user_id = a1.user_id
+          and
+              a1.is_delete = 0
+          and
+              a2.is_delete = 0
+          and
+              a1.video_id = #{videoId};
+    </select>
+
+    <insert id="addComment">
+        insert into graduation_design.video_comment values (null,#{videoId},#{userId},#{parentId},#{comment},0,now(),0);
+    </insert>
+
+    <update id="deleteComment">
+        update graduation_design.video_comment set is_delete = 1 where vc_id = #{commentId} and user_id = #{userId};
+    </update>
+
+    <select id="findCommentByVCId" resultType="videoComment">
+        select * from graduation_design.video_comment where vc_id = #{commentId};
+    </select>
+
+    <update id="updateCommentLike">
+        update graduation_design.video_comment set like_count = #{count} where vc_id = #{commentId};
+    </update>
+
+    <update id="deleteCommentById">
+        update graduation_design.video_comment set is_delete = 1 where vc_id = #{commentId};
+    </update>
+
+    <update id="deleteParentByCommentId">
+        update graduation_design.video_comment set is_delete = 1 where parent_id = #{commentId};
+    </update>
+
+    <delete id="delCommentByVideoId">
+        delete from graduation_design.video_comment where video_id = #{videoId};
+    </delete>
+
+    <select id="getCommentIdsByVideoId" resultType="integer">
+        select vc_id from graduation_design.video_comment where video_id = #{videoId};
+    </select>
+</mapper>

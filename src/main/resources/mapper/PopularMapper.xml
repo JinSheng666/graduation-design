@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.PopularMapper">
+
+    <select id="findPopular" resultType="com.jinsheng.vo.VoPopular">
+        select
+               a2.popular_id as popularId,a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count as attitudesCount,
+               a1.comments_count as commentsCount, a1.like_count as likeCount, a1.create_time createTime, a1.text,
+               a3.user_name userName,a3.user_id userId,a3.location,a3.head_sculpture headSculpture
+        from
+             graduation_design.tb_forum a1,
+             graduation_design.tb_popular a2,
+             graduation_design.tb_user a3
+        where
+              a2.forum_id = a1.forum_id
+          and
+              a1.user_id = a3.user_id
+          and
+              a2.is_delete = 0;
+    </select>
+
+    <select id="popularAll" resultType="com.jinsheng.vo.VoForum">
+        select
+            a2.forum_id forumId, a2.topics, a2.pics, a2.video_url videoUrl, a2.attitudes_count attitudesCount,
+            a2.comments_count commentsCount, a2.like_count likeCount, a2.create_time createTime, a2.text,
+            a3.user_name userName,a3.code userId,a3.location,a3.head_sculpture headSculpture
+        from graduation_design.tb_popular a1,
+             graduation_design.tb_forum a2,
+             graduation_design.tb_user a3
+        where
+              a1.forum_id = a2.forum_id
+          and
+              a2.user_id = a3.user_id
+          and
+              a1.is_delete = 0;
+    </select>
+
+    <insert id="addPopular">
+        insert into graduation_design.tb_popular values (null,#{forumId},0);
+    </insert>
+
+    <update id="deletePopular">
+        update graduation_design.tb_popular set is_delete = 1 where popular_id = #{popularId};
+    </update>
+
+    <select id="popularId" resultType="com.jinsheng.vo.VoPopular">
+        select
+            a2.popular_id as popularId,a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count as attitudesCount,
+            a1.comments_count as commentsCount, a1.like_count as likeCount, a1.create_time createTime, a1.text,
+            a3.user_name userName,a3.user_id userId,a3.location,a3.head_sculpture headSculpture
+        from
+            graduation_design.tb_forum a1,
+            graduation_design.tb_popular a2,
+            graduation_design.tb_user a3
+        where
+            a2.forum_id = a1.forum_id
+          and
+            a1.user_id = a3.user_id
+          and
+            a2.is_delete = 0
+          and
+            a2.popular_id = #{popularId};
+    </select>
+
+    <delete id="popularDelByForumId">
+        delete from graduation_design.tb_popular where forum_id = #{forumId};
+    </delete>
+</mapper>

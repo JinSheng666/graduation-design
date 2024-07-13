@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.VideoLikeMapper">
+
+    <select id="likeStatusById" resultType="videoLike">
+        select * from graduation_design.video_like where like_post_id = #{userId} and video_id = #{videoId};
+    </select>
+
+    <insert id="addVideoLike" >
+        insert into graduation_design.video_like values (null,#{videoId},#{userId},0,now(),null);
+    </insert>
+
+    <select id="countByVideoId" resultType="integer">
+        select count(*) from graduation_design.video_like where status = 0 and video_id = #{videoId};
+    </select>
+
+    <update id="updateVideoLike">
+        update graduation_design.video_like set status = #{status},update_time = now() where vl_id = #{vlId};
+    </update>
+
+    <delete id="delLikeVideoId">
+        delete from graduation_design.video_like where video_id = #{videoId}
+    </delete>
+
+    <select id="videoLikeCurrentUser" resultType="integer">
+        select video_id from graduation_design.video_like where like_post_id = #{userId};
+    </select>
+</mapper>

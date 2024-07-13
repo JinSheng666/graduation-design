@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.VideoCommentLikeMapper">
+
+    <select id="likeStatusById" resultType="videoCommentLike">
+        select * from graduation_design.video_comment_like where like_post_id = #{userId} and comment_id = #{commentId};
+    </select>
+
+    <insert id="addVideoCommentLike">
+        insert into graduation_design.video_comment_like values (null,#{commentId},#{userId},0,now(),null);
+    </insert>
+
+    <select id="countByCommentId" resultType="integer">
+        select count(*) from graduation_design.video_comment_like where status = 0 and comment_id = #{commentId};
+    </select>
+
+    <update id="updateVideoCommentLike">
+        update graduation_design.video_comment_like set status = #{status},update_time = now() where vcl_id = #{vclId};
+    </update>
+
+    <delete id="delCommentLikeByCommentId">
+        delete
+        from
+        graduation_design.video_comment_like
+        where
+              comment_id
+                  in
+        <foreach collection="list" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.RoleMapper">
+
+    <select id="findAllRole" resultType="role">
+        select * from graduation_design.tb_role;
+    </select>
+
+    <update id="updateRole" parameterType="role">
+        update graduation_design.tb_role set role_name = #{roleName},update_time = now() where role_id = #{roleId};
+    </update>
+
+    <insert id="addRole" parameterType="role">
+        insert into graduation_design.tb_role values (null,#{roleName},now(),null);
+    </insert>
+</mapper>

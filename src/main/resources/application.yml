@@ -1,0 +1,67 @@
+# 应用服务 WEB 访问端口
+server:
+  port: 8888
+#  servlet:
+#    context-path: /graduation-design/
+
+# 访问地址 IP
+ip:
+  dns-addr: 124.222.111.236
+
+spring:
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${ip.dns-addr}:3306/graduation_design?useSSL=false&characterEncodinq=utf-8&serverTimezone=UTC
+    username: jinsheng
+    password: 123456
+
+  redis:
+    port: 6379
+    host: ${ip.dns-addr}
+    password: 123456
+
+logging:
+  level:
+    com.jinsheng: debug
+
+mybatis:
+  #  sql配置文件位置
+  mapper-locations: mapper/*.xml
+  configuration:
+    #    开启驼峰命名
+    map-underscore-to-camel-case: true
+    #    日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  #  指定给实体起别名  --指定实体类所在的包路径，那么包中的实体类默认首字母小写
+  type-aliases-package: com.jinsheng.domain
+
+#  token的过期时间 18000000
+graduation_design.expire-time: 18000000
+#图片上传的位置
+#D:/project/upload/img
+file:
+  upload-img-path:
+#视频上传的位置
+#D:/project/upload/video
+  upload-video-path:
+#访问照片
+http:
+  access-img-path: http://${ip.dns-addr}:8888/video-image/image/
+#访问视频
+  access-video-path: http://${ip.dns-addr}:8888/video-image/video/
+#静态文件路径
+static-path: classpath:static/
+#允许跨域地址
+allow-cross-domain: http://${ip.dns-addr}:9999
+
+
+

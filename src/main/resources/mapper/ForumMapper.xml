@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.ForumMapper">
+
+    <select id="forumCount" resultType="integer">
+        select
+               count(*)
+        from
+             graduation_design.tb_forum a1,
+             graduation_design.tb_user a2
+        where
+              a1.user_id = a2.user_id
+          and
+              a1.is_delete = 0
+          and
+              a2.is_delete = 0
+        <if test="forum.userId != null">
+            and a2.user_id = #{forum.userId}
+        </if>
+        <if test="forum.topics != null and forum.topics != ''">
+            and a1.topics like concat('%',#{forum.topics},'%')
+        </if>
+        <if test="forum.text != null and forum.text != ''">
+            and a1.text like concat('%',#{forum.text},'%')
+        </if>
+        <if test="forum.startTime != null and forum.startTime !=''">
+            and a1.create_time &gt;= #{forum.startTime}   /*大于等于*/
+        </if>
+        <if test="forum.endTime != null and forum.endTime !=''">
+            and a1.create_time &lt;= #{forum.endTime}   /*小于等于*/
+        </if>
+    </select>
+
+    <select id="forumPage" resultType="forum">
+        select
+        a1.*,a2.user_name userName
+        from
+        graduation_design.tb_forum a1,
+        graduation_design.tb_user a2
+        where
+        a1.user_id = a2.user_id
+        and
+        a1.is_delete = 0
+        and
+        a2.is_delete = 0
+        <if test="forum.userId != null">
+            and a2.user_id = #{forum.userId}
+        </if>
+        <if test="forum.topics != null and forum.topics != ''">
+            and a1.topics like concat('%',#{forum.topics},'%')
+        </if>
+        <if test="forum.text != null and forum.text != ''">
+            and a1.text like concat('%',#{forum.text},'%')
+        </if>
+        <if test="forum.startTime != null and forum.startTime !=''">
+            and a1.create_time &gt;= #{forum.startTime}   /*大于等于*/
+        </if>
+        <if test="forum.endTime != null and forum.endTime !=''">
+            and a1.create_time &lt;= #{forum.endTime}   /*小于等于*/
+        </if>
+        order by a1.create_time desc  /*按照时间升序*/
+        limit
+        #{page.limitIndex},#{page.pageSize};
+    </select>
+
+    <select id="forumSearchCount" resultType="integer">
+        select distinct
+            count(*)
+        from
+            graduation_design.tb_forum a1
+            left join graduation_design.tb_user a2 on a1.user_id = a2.user_id
+        where
+            a2.user_id = a1.user_id
+        and
+        a1.is_privacy = a1.is_delete = a2.is_delete = 0
+        <if test="search != null and search != ''">
+            and a2.user_name like concat('%',#{search},'%')
+            or a2.code like concat('%',#{search},'%')
+            or a1.topics like concat('%',#{search},'%')
+            or a1.text like concat('%',#{search},'%')
+        </if>
+    </select>
+
+    <select id="forumSearch" resultType="com.jinsheng.vo.VoForum">
+        select distinct
+            a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count as attitudesCount,
+            a1.comments_count as commentsCount, a1.like_count as likeCount, a1.create_time createTime, a1.text,
+            a2.user_name userName,a2.user_id userId,a2.location,a2.head_sculpture headSculpture
+        from
+            graduation_design.tb_forum a1
+                /*把left join左边的表的记录全部找出来。系统会先用表A和表B做个笛卡儿积，然后以表A为基表，去掉笛卡儿积中表A部分为NULL的记录。最后形成你的结果。去重*/
+            left join graduation_design.tb_user a2 on a1.user_id = a2.user_id
+        where
+            a2.user_id = a1.user_id
+            and
+            a1.is_privacy = a1.is_delete = a2.is_delete = 0
+            <if test="search != null and search != ''">
+                and a2.user_name like concat('%',#{search},'%')
+                or a2.code like concat('%',#{search},'%')
+                or a1.topics like concat('%',#{search},'%')
+                or a1.text like concat('%',#{search},'%')
+            </if>
+            order by a1.create_time desc
+            limit
+            #{page.limitIndex},#{page.pageSize}
+    </select>
+
+    <insert id="addForum">
+        insert into graduation_design.tb_forum values (null,#{userId},#{topics},#{text},#{pics},#{videoUrl},null,null,null,0,now(),null,0,0);
+    </insert>
+
+    <select id="findAll" resultType="forum">
+        select
+               a1.forum_id, a1.user_id, a1.topics, a1.text, a1.pics, a1.video_url, a1.attitudes_count, a1.comments_count, a1.like_count, a1.is_privacy, a1.create_time, a1.update_time,a2.user_name userName
+        from
+             graduation_design.tb_forum a1,graduation_design.tb_user a2 where a2.user_id = a1.user_id order by a1.create_time desc;
+    </select>
+
+    <update id="deleteForum">
+        update graduation_design.tb_forum set is_delete = 1 where forum_id = #{forumId};
+    </update>
+
+    <update id="updateForum" parameterType="com.jinsheng.vo.VoForumId">
+        update
+            graduation_design.tb_forum
+        set
+                topics = #{topics},
+            <if test="text != null and text != ''">
+                text = #{text},
+            </if>
+            <if test="pics != null and pics != ''">
+                pics = #{pics},
+            </if>
+            <if test="videoUrl != null and videoUrl != ''">
+                video_url = #{videoUrl},
+            </if>
+            update_time = now()
+        where
+              forum_id = #{forumId};
+    </update>
+
+    <select id="selectById" resultType="com.jinsheng.vo.VoForumId">
+        select forum_id, topics, text, pics, video_url from graduation_design.tb_forum where forum_id = #{forumId};
+    </select>
+
+    <update id="updatePrivacy">
+        update graduation_design.tb_forum set is_privacy = 1 where is_delete = 0 and forum_id = #{id};
+    </update>
+
+    <update id="updatePopular">
+        update graduation_design.tb_forum set is_popular = 1 where is_delete = 0 and forum_id = #{id};
+    </update>
+
+    <update id="updateComment">
+        update graduation_design.tb_forum set comments_count = #{commentCount} where is_delete = 0 and forum_id = #{forumId};
+    </update>
+
+    <select id="findForumByUserId" resultType="forum">
+        select * from graduation_design.tb_forum where is_delete = 0 and user_id = #{userId} and forum_id = #{forumId}
+    </select>
+
+    <update id="updateLike">
+        update graduation_design.tb_forum set like_count = #{likeCount} where forum_id = #{forumId};
+    </update>
+
+    <select id="findFormByUserId" resultType="com.jinsheng.vo.VoForum">
+        select
+        a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count attitudesCount,
+        a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime, a1.text,
+        a2.user_name userName,a2.code userId,a2.location,a2.head_sculpture headSculpture
+        from
+        graduation_design.tb_forum a1,
+        graduation_design.tb_user a2
+        where
+        a2.user_id = a1.user_id
+        and
+        a1.is_privacy = a1.is_delete = a2.is_delete = 0
+        and
+        a1.user_id = #{userId};
+    </select>
+
+    <select id="findFormCountByUserId" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.tb_forum a1,
+            graduation_design.tb_user a2
+        where
+            a2.user_id = a1.user_id
+          and
+            a1.is_privacy = a1.is_delete = a2.is_delete = 0
+          and
+            a1.user_id = #{userId};
+    </select>
+
+    <select id="findPrivacyFormCountByUserId" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.tb_forum a1,
+            graduation_design.tb_user a2
+        where
+            a2.user_id = a1.user_id
+          and
+            a1.is_privacy = 1
+          and
+            a1.is_delete = a2.is_delete = 0
+          and
+            a1.user_id = #{userId};
+    </select>
+
+    <delete id="forumDelById">
+        delete from graduation_design.tb_forum where forum_id = #{forumId};
+    </delete>
+
+    <select id="findPrivacyFormByUserId" resultType="com.jinsheng.vo.VoForum">
+        select
+            a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count attitudesCount,
+            a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime, a1.text,
+            a2.user_name userName,a2.code userId,a2.location,a2.head_sculpture headSculpture
+        from
+            graduation_design.tb_forum a1,
+            graduation_design.tb_user a2
+        where
+            a2.user_id = a1.user_id
+          and
+            a1.is_privacy = 1
+          and
+            a1.is_delete = 0
+          and
+            a2.is_delete = 0
+          and
+            a1.user_id = #{userId};
+    </select>
+
+    <select id="getForumUserIds" resultType="integer">
+        select
+        user_id
+        from
+        graduation_design.tb_forum
+        where
+        forum_id
+        in
+        <foreach collection="list" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getForumByIds" resultType="com.jinsheng.vo.VoForum">
+        select
+        a1.forum_id forumId, a1.topics, a1.pics, a1.video_url videoUrl, a1.attitudes_count attitudesCount,
+        a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime, a1.text,
+        a2.user_name userName,a2.code userId,a2.location,a2.head_sculpture headSculpture
+        from
+        graduation_design.tb_forum a1,
+        graduation_design.tb_user a2
+        where
+        a2.user_id = a1.user_id
+        and
+        a1.forum_id
+        in
+        <foreach collection="forumIdList" open="(" close=")" separator="," item="forumId">
+            #{forumId}
+        </foreach>
+        and
+        a2.user_id
+        in
+        <foreach collection="userIdList" open="(" close=")" separator="," item="userId">
+            #{userId}
+        </foreach>
+
+    </select>
+
+</mapper>

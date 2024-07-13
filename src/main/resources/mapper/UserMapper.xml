@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.UserMapper">
+
+    <select id="findUserName" resultType="user">
+        select * from graduation_design.tb_user where user_name = #{userName};
+    </select>
+
+    <insert id="addUser" parameterType="user">
+        insert into graduation_design.tb_user values (null,#{user.userName},#{user.code},#{user.password},
+                                                      #{user.headSculpture},1,null,3,0,null,null,null,null, now(),null,0);
+    </insert>
+
+    <select id="findCode" resultType="user">
+        select code from graduation_design.tb_user where code = #{code};
+    </select>
+
+    <select id="findAllUser" resultType="user">
+        select * from graduation_design.tb_user;
+    </select>
+
+    <update id="updateUser" parameterType="user">
+        update
+            graduation_design.tb_user
+        set
+        <if test="user.userName != null and user.userName !=''">
+            user_name = #{user.userName},
+        </if>
+        <if test="user.gender != null and user.gender !=''">
+            gender = #{user.gender},
+        </if>
+        <if test="user.age != null">
+            age = #{user.age},
+        </if>
+        <if test="user.signature != null and user.signature !=''">
+            signature = #{user.signature},
+        </if>
+        <if test="user.location != null and user.location !=''">
+            location = #{user.location},
+        </if>
+        <if test="user.home != null and user.home !=''">
+            home = #{user.home},
+        </if>
+        <if test="user.description != null and user.description !=''">
+            description = #{user.description},
+        </if>
+            update_time = now()
+        where
+              user_id = #{user.userId};
+    </update>
+
+    <update id="updatePassword">
+        update graduation_design.tb_user set password = #{password} where user_id = #{userId};
+    </update>
+
+    <select id="CurrentUser" resultType="com.jinsheng.vo.VoCurrentUser">
+        select user_name,head_sculpture,signature from graduation_design.tb_user where user_name = #{userName};
+    </select>
+
+    <select id="findUserRowCount" resultType="integer">
+        select
+        count(*)
+        from
+        graduation_design.tb_user a1,
+        graduation_design.tb_role a2
+        where
+        a1.type = a2.role_id
+        <if test="user.type != null">
+            and a2.role_id = #{user.intType}
+        </if>
+        <if test="user.userName != null and user.userName !=''">
+            and a1.user_name like concat('%',#{user.userName},'%')
+        </if>
+        <if test="user.userName != null and user.userName !=''">
+            and a1.code like concat('%',#{user.code},'%')
+        </if>
+    </select>
+
+    <select id="findPageUser" resultType="user">
+        select
+               a1.user_id,a1.user_name,a1.code,a1.head_sculpture,a1.gender,
+               a1.age,a1.type,a1.status,a1.signature,a1.location,a1.home,
+               a1.description,a1.create_time,a1.update_time,a1.is_delete,
+               a2.role_name roleName
+        from
+             graduation_design.tb_user a1,
+             graduation_design.tb_role a2
+        where
+              a1.type = a2.role_id
+        <if test="user.type != null">
+            and a2.role_id = #{user.intType}
+        </if>
+        <if test="user.userName != null and user.userName !=''">
+            and a1.user_name like concat('%',#{user.userName},'%')
+        </if>
+        <if test="user.userName != null and user.userName !=''">
+            and a1.code like concat('%',#{user.code},'%')
+        </if>
+        limit
+            #{page.limitIndex},#{page.pageSize}
+    </select>
+
+    <select id="getLoginUser" resultType="user">
+        select user_id,user_name,code,head_sculpture,gender,
+                age,signature,location,home,description
+        from
+             graduation_design.tb_user
+        where
+              user_id = #{userId} and is_delete = 0
+    </select>
+
+</mapper>

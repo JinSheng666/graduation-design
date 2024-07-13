@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.CopywritingMapper">
+
+    <select id="cwCount" resultType="integer">
+        select
+               count(*)
+        from
+        graduation_design.tb_copywriting a1,
+        graduation_design.tb_user a2
+        where
+        a1.user_id = a2.user_id and a1.is_delete = 0
+        <if test="cw.userId != null">
+            and a2.user_id = #{cw.userId}
+        </if>
+        <if test="cw.isSelect != null">
+            and a1.is_select = #{cw.isSelect}
+        </if>
+        <if test="cw.userName != null and cw.userName !=''">
+            and a2.user_name like concat('%',#{cw.userName},'%')
+        </if>
+    </select>
+
+    <select id="copyWritingPage" resultType="copywriting">
+        select
+               a1.user_id,a1.copywriting_id, a1.text, a1.create_time, a1.update_time, a1.is_select,a2.user_name userName
+        from
+             graduation_design.tb_copywriting a1,
+             graduation_design.tb_user a2
+        where
+              a1.user_id = a2.user_id and a1.is_delete = 0
+        <if test="cw.userId != null">
+        and a2.user_id = #{cw.userId}
+        </if>
+        <if test="cw.isSelect != null">
+            and a1.is_select = #{cw.isSelect}
+        </if>
+        <if test="cw.userName != null and cw.userName !=''">
+            and a2.user_name like concat('%',#{cw.userName},'%')
+        </if>
+        <if test="cw.startTime != null and cw.startTime !=''">
+            and a1.create_time &gt;= #{cw.startTime}   /*大于等于*/
+        </if>
+        <if test="cw.endTime != null and cw.endTime !=''">
+            and a1.create_time &lt;= #{cw.endTime}   /*小于等于*/
+        </if>
+        order by a1.create_time desc  /*按照时间升序*/
+        limit
+        #{page.limitIndex},#{page.pageSize};
+    </select>
+
+    <select id="findCwByIsSelect" resultType="copywriting">
+        select
+               a1.copywriting_id,a1.text,a2.user_name userName
+        from
+             graduation_design.tb_copywriting a1,
+             graduation_design.tb_user a2
+        where
+              a2.user_id = a1.user_id
+          and
+              a1.is_select = 1
+          and
+              a1.is_delete = 0;
+    </select>
+
+    <update id="updateCopeWriting" parameterType="copywriting">
+        update
+            graduation_design.tb_copywriting
+        set
+            text = #{text},update_time = now()
+        where
+              copywriting_id = #{copywritingId};
+
+    </update>
+
+    <insert id="addCopeWriting" parameterType="copywriting">
+        insert into graduation_design.tb_copywriting values (null,#{userId},#{text},now(),null,0,0);
+    </insert>
+
+    <!--批量删除-->
+    <update id="deleteCopeWriting">
+        update
+            graduation_design.tb_copywriting
+        set
+            is_delete = 1
+        where
+              copywriting_id in
+        <foreach collection="list" open="(" close=")" separator="," item="cwId">
+            #{cwId}
+        </foreach>
+    </update>
+
+    <delete id="deleteCopeWritingById">
+        delete from graduation_design.tb_copywriting where copywriting_id = #{id};
+    </delete>
+
+    <select id="findCopyWritingByUserId" resultType="copywriting">
+        select
+        a1.user_id,a1.copywriting_id, a1.text, a1.create_time, a1.update_time, a1.is_select,a2.user_name userName
+        from
+        graduation_design.tb_copywriting a1,
+        graduation_design.tb_user a2
+        where
+        a1.user_id = a2.user_id and a1.is_delete = 0 and a1.user_id = #{userId};
+    </select>
+
+    <select id="findCopyWritingCountByUserId" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.tb_copywriting a1,
+            graduation_design.tb_user a2
+        where
+            a1.user_id = a2.user_id and a1.is_delete = 0 and a1.user_id = #{userId};
+    </select>
+
+    <select id="copywritingById" resultType="copywriting">
+        select * from graduation_design.tb_copywriting where copywriting_id = #{id};
+    </select>
+
+</mapper>

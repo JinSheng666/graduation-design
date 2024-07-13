@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.VideoMapper">
+
+    <select id="videoSearchCount" resultType="integer">
+        select distinct
+        count(*)
+        from
+        graduation_design.tb_video a1
+        left join graduation_design.tb_user a2 on a1.user_id = a2.user_id
+        where
+        a1.is_delete = 0
+        and
+        a2.is_delete = 0
+        and
+        a2.user_id = a1.user_id
+        <if test="search != null and search != ''">
+            and a2.user_name like concat('%',#{search},'%')
+            or a2.code like concat('%',#{search},'%')
+            or a1.title like concat('%',#{search},'%')
+            or a1.text like concat('%',#{search},'%')
+        </if>
+    </select>
+
+    <select id="videoSearch" resultType="com.jinsheng.vo.VoVideo">
+        select distinct
+               a1.video_id videoId, a1.title, a1.video, a1.text, a1.is_privacy isPrivacy, a1.attitudes_count attitudesCount,
+               a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime,
+               a2.user_id userId, a2.user_name userName, a2.head_sculpture headSculpture, a2.location
+        from
+             graduation_design.tb_video a1
+                 left join graduation_design.tb_user a2 on a1.user_id = a2.user_id
+        where
+              a1.is_delete = 0
+                  and
+              a2.is_delete = 0
+                  and
+              a2.user_id = a1.user_id
+        <if test="search != null and search != ''">
+            and a2.user_name like concat('%',#{search},'%')
+            or a2.code like concat('%',#{search},'%')
+            or a1.title like concat('%',#{search},'%')
+            or a1.text like concat('%',#{search},'%')
+        </if>
+        order by a1.create_time desc
+        limit #{page.limitIndex},#{page.pageSize}
+    </select>
+
+    <select id="videoPageCount" resultType="integer">
+        select
+        count(*)
+        from
+        graduation_design.tb_video a1,
+        graduation_design.tb_user a2
+        where
+        a2.user_id = a1.user_id
+        and
+        a1.is_delete = 0
+        and
+        a2.is_delete = 0
+        <if test="userId != null">
+            and a1.user_id = #{userId}
+        </if>
+        <if test="title != null and title != ''">
+            and a1.title like concat('%',#{title},'%')
+        </if>
+        <if test="text != null and text != ''">
+            and a1.text like concat('%',#{text},'%')
+        </if>
+        <if test="startTime != null and startTime !=''">
+            and a1.create_time &gt;= #{startTime}   /*大于等于*/
+        </if>
+        <if test="endTime != null and endTime !=''">
+            and a1.create_time &lt;= #{endTime}   /*小于等于*/
+        </if>
+    </select>
+
+    <select id="videoPage" resultType="video">
+        select
+               a1.*,a2.user_name userName
+        from
+             graduation_design.tb_video a1,
+             graduation_design.tb_user a2
+        where
+              a2.user_id = a1.user_id
+          and
+              a1.is_delete = 0
+          and
+              a2.is_delete = 0
+        <if test="video.userId != null">
+            and a1.user_id = #{video.userId}
+        </if>
+        <if test="video.title != null and video.title != ''">
+            and a1.title like concat('%',#{video.title},'%')
+        </if>
+        <if test="video.text != null and video.text != ''">
+            and a1.text like concat('%',#{video.text},'%')
+        </if>
+        <if test="video.startTime != null and video.startTime !=''">
+            and a1.create_time &gt;= #{video.startTime}   /*大于等于*/
+        </if>
+        <if test="video.endTime != null and video.endTime !=''">
+            and a1.create_time &lt;= #{video.endTime}   /*小于等于*/
+        </if>
+        order by a1.create_time desc  /*按照时间升序*/
+        limit
+        #{page.limitIndex},#{page.pageSize};
+
+    </select>
+
+    <insert id="addVideo">
+        insert into graduation_design.tb_video values (null,#{userId},#{title},#{video},#{text},0,0,0,0,now(),null,0);
+    </insert>
+
+    <!--<update id="deleteVideo">
+        update graduation_design.tb_video set is_delete = 1 where video_id = #{videoId};
+    </update>-->
+
+    <delete id="deleteVideo">
+        delete from graduation_design.tb_video where video_id = #{videoId};
+    </delete>
+
+    <select id="findVideoById" resultType="string">
+        select video from graduation_design.tb_video where is_delete = 0 and video_id = #{videoId};
+    </select>
+
+    <update id="videoIsPrivacy">
+        update graduation_design.tb_video set is_privacy = #{IsPrivacy} where video_id = #{videoId};
+    </update>
+
+    <update id="updateVideo">
+        update graduation_design.tb_video set title = #{title},text = #{text},video = #{video} where video_id = #{videoId};
+    </update>
+
+    <select id="idFindVideo" resultType="com.jinsheng.dto.DtoVideo">
+        select
+               a1.*,a2.user_name as userName,a2.head_sculpture as headSculpture
+        from
+             graduation_design.tb_video a1,
+             graduation_design.tb_user a2
+        where
+              a1.user_id = a2.user_id and a1.video_id = #{videoId} and a1.is_delete = 0;
+    </select>
+
+    <update id="updateCommentCount">
+        update graduation_design.tb_video set comments_count = #{count} where video_id = #{videoId};
+    </update>
+
+    <update id="updateLikeCount">
+        update graduation_design.tb_video set like_count = #{count} where video_id = #{videoId};
+    </update>
+
+    <select id="findVideoByUserId" resultType="com.jinsheng.vo.VoVideo">
+        select
+        a1.video_id videoId, a1.title, a1.video, a1.text, a1.is_privacy isPrivacy, a1.attitudes_count attitudesCount,
+        a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime,
+        a2.user_id userId, a2.user_name userName, a2.head_sculpture headSculpture, a2.location
+        from
+        graduation_design.tb_video a1,
+        graduation_design.tb_user a2
+        where
+        a1.is_delete = 0
+        and
+        a2.is_delete = 0
+        and
+        a2.user_id = a1.user_id
+        and
+        a1.is_privacy = 0
+        and
+        a1.user_id = #{userId};
+    </select>
+
+    <select id="findVideoCountByUserId" resultType="integer">
+        select
+            count(*)
+        from
+            graduation_design.tb_video a1,
+            graduation_design.tb_user a2
+        where
+            a1.is_delete = 0
+          and
+            a2.is_delete = 0
+          and
+            a2.user_id = a1.user_id
+          and
+            a1.user_id = #{userId};
+    </select>
+
+    <select id="findPrivacyVideoByUserId" resultType="com.jinsheng.vo.VoVideo">
+        select
+        a1.video_id videoId, a1.title, a1.video, a1.text, a1.is_privacy isPrivacy, a1.attitudes_count attitudesCount,
+        a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime,
+        a2.user_id userId, a2.user_name userName, a2.head_sculpture headSculpture, a2.location
+        from
+        graduation_design.tb_video a1,
+        graduation_design.tb_user a2
+        where
+        a1.is_delete = 0
+        and
+        a2.is_delete = 0
+        and
+        a2.user_id = a1.user_id
+        and
+        a1.is_privacy = 1
+        and
+        a1.user_id = #{userId};
+    </select>
+
+    <select id="IsPrivacy" resultType="int">
+        select is_privacy from graduation_design.tb_video where video_id = #{videoId};
+    </select>
+
+    <select id="getVideoUserIds" resultType="integer">
+        select
+        user_id
+        from
+        graduation_design.tb_video
+        where
+        video_id
+        in
+        <foreach collection="list" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getVideoByIds" resultType="com.jinsheng.vo.VoVideo">
+        select
+        a1.video_id videoId, a1.title, a1.video, a1.text, a1.is_privacy isPrivacy, a1.attitudes_count attitudesCount,
+        a1.comments_count commentsCount, a1.like_count likeCount, a1.create_time createTime,
+        a2.user_id userId, a2.user_name userName, a2.head_sculpture headSculpture, a2.location
+        from
+        graduation_design.tb_video a1,
+        graduation_design.tb_user a2
+        where
+        a1.user_id = a2.user_id
+        and
+        a1.video_id
+        in
+        <foreach collection="videoIdList" open="(" close=")" separator="," item="videoId">
+            #{videoId}
+        </foreach>
+        and
+        a2.user_id
+        in
+        <foreach collection="userIdList" open="(" close=")" separator="," item="userId">
+            #{userId}
+        </foreach>
+
+    </select>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinsheng.mapper.ForumLikeMapper">
+
+    <insert id="addForumLike">
+        insert into graduation_design.forum_like values (null,#{forumId},#{userId},0,now(),null);
+    </insert>
+
+    <update id="updateForumLike">
+        update graduation_design.forum_like set status = #{status},update_time = now() where fl_id = #{likeId}
+    </update>
+
+    <select id="likeStatusById" resultType="forumLike">
+        select
+               *
+        from
+             graduation_design.forum_like
+        where
+              like_post_id = #{userId}
+          and
+              forum_id = #{forumId};
+    </select>
+
+    <select id="countByForumId" resultType="integer">
+        select count(*) from graduation_design.forum_like where status = 0 and forum_id = #{forumId};
+    </select>
+
+    <delete id="likeDelByForumId">
+        delete from graduation_design.forum_like where forum_id = #{forumId};
+    </delete>
+
+    <select id="forumLikeCurrentUser" resultType="integer">
+        select forum_id from graduation_design.forum_like where like_post_id = #{userId};
+    </select>
+</mapper>
