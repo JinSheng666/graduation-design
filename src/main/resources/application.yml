@@ -4,9 +4,9 @@ server:
 #  servlet:
 #    context-path: /graduation-design/
 
-# 访问地址 IP
+# 项目访问地址
 ip:
-  dns-addr: 124.222.111.236
+  dns-addr: localhost
 
 spring:
   web:
@@ -21,7 +21,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${ip.dns-addr}:3306/graduation_design?useSSL=false&characterEncodinq=utf-8&serverTimezone=UTC
-    username: jinsheng
+    username: root
     password: 123456
 
   redis:
